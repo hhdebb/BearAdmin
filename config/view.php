@@ -23,4 +23,6 @@ return [
     // 标签库标签结束标记
     'taglib_end'     => '}',
     'default_filter' => 'htmlentities_view',
+    // 标签库标签
+    'taglib_pre_load'  => 'app\common\taglib\Bear',
 ];
