@@ -44,7 +44,7 @@ class Setting extends CommonBaseModel
     public function setContentAttr($value)
     {
         try {
-            return json_encode($value, JSON_THROW_ON_ERROR);
+            return json_encode($value, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         } catch (JsonException $e) {
             return (object)[];
         }
@@ -53,7 +53,7 @@ class Setting extends CommonBaseModel
     public function getContentAttr($value)
     {
         try {
-            return json_decode($value, true, 512, JSON_THROW_ON_ERROR);
+            return json_decode($value, true, 512, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         } catch (JsonException $e) {
             return [];
         }
