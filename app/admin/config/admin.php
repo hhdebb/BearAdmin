@@ -1,7 +1,7 @@
 <?php
 /**
 * 后台设置:后台管理方面的设置
-* 此配置文件为自动生成，生成时间2022-11-17 15:37:13
+* 此配置文件为自动生成，生成时间2025-06-09 02:12:47
 */
 
 return [
@@ -23,17 +23,15 @@ return [
     // 登录设置:后台登录相关设置
     'login'=>[
     // 登录token验证
-    'token'=>'0',
+    'token'=>'1',
     // 验证码
     'captcha'=>'1',
-    // 登录背景
-    'background'=>'/static/admin/images/login-default-bg.jpg',
     // 极验ID
     'geetest_id'=>'66cfc0f309e368364b753dad7d2f67f2',
     // 极验KEY
     'geetest_key'=>'99750f86ec232c997efaff56c7b30cd3',
     // 登录重试限制
-    'login_limit'=>'1',
+    'login_limit'=>'0',
     // 限制最大次数
     'login_max_count'=>'5',
     // 禁止登录时长(小时)
@@ -52,7 +50,7 @@ return [
     // 密码安全强度等级
     'password_level'=>'2',
     // 单设备登录
-    'one_device_login'=>'1',
+    'one_device_login'=>'0',
     // CSRFToken检测
     'check_token'=>'1',
     // CSRFToken验证方法
