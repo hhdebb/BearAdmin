@@ -96,7 +96,7 @@
                                     <span class="badge bg-primary ">{$item_role.name|default=''}</span>
                                     {/foreach}
                                 </td>
-                                <td>{bear:status status="$item.status" text="$item.status_text" /}</td>
+                                <td>{bear:status value="$item.status" text="$item.status_text" /}</td>
                                 <td>
                                     <a href="{:url('edit',['id'=>$item.id])}"
                                        class="btn btn-primary btn-xs" title="修改" data-toggle="tooltip">

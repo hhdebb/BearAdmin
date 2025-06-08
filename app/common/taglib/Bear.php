@@ -21,9 +21,9 @@ class Bear extends TagLib
      */
     public function tagStatus(array $tag): string
     {
-        $status = $this->autoBuildVar($tag['status']);
+        $status = $this->autoBuildVar($tag['value']);
         $text = $this->autoBuildVar($tag['text']);
-        
+
         $parseStr = '<?php ';
         $parseStr .= '$status = ' . $status . ';';
         $parseStr .= '$text = ' . $text . ';';
