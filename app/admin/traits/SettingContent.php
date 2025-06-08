@@ -22,15 +22,18 @@ trait SettingContent
     protected function getContent($param): array
     {
         $content = [];
-        foreach ($param['config_name'] as $key => $value) {
-            if (($param['config_name'][$key]) === ''
+        foreach ( $param['config_name'] as $key => $value )
+        {
+            if ( ($param['config_name'][$key]) === ''
                 || ($param['config_field'][$key] === '')
                 || ($param['config_type'][$key] === '')
-            ) {
+            )
+            {
                 throw new RuntimeException('设置信息不完整');
             }
 
-            if ($param['config_option'][$key] === '' && in_array($param['config_type'][$key], ['select', 'multi_select'])) {
+            if ( $param['config_option'][$key] === '' && in_array($param['config_type'][$key], ['select', 'multi_select']) )
+            {
                 throw new RuntimeException('设置信息不完整');
             }
 
@@ -52,8 +55,10 @@ trait SettingContent
 
     protected function checkName($name): void
     {
-        $pattern = '/^[\x{4e00}-\x{9fa5}\x{9fa6}-\x{9fef}\x{3400}-\x{4db5}\x{20000}-\x{2ebe0}a-zA-Z0-9_\-]+$/u';
-        if (!preg_match($pattern, $name)) {
+        // 匹配规则: 开始->中文字符(包括常用汉字、扩展汉字集、中日韩扩展字符等)+英文字母+数字+下划线+破折号->结束，u修饰符支持UTF-8编码
+        $pattern = '/^[\x{4e00}-\x{9fa5}\x{9fa6}-\x{9fef}\x{3400}-\x{4db5}\x{20000}-\x{2ebe0}a-zA-Z0-9_\-()]+$/u';
+        if ( !preg_match($pattern, $name) )
+        {
             throw new RuntimeException('名称的值只能是汉字、字母、数字和下划线_及破折号-');
         }
     }
@@ -61,14 +66,16 @@ trait SettingContent
     protected function checkField($name): void
     {
         $pattern = '/^[a-zA-z]\w{2,49}$/';
-        if (!preg_match($pattern, $name)) {
+        if ( !preg_match($pattern, $name) )
+        {
             throw new RuntimeException('字段的值只能是字母、数字、下划线组成，字母开头，3-50位');
         }
     }
 
     protected function checkType($name): void
     {
-        if (!in_array($name, $this->typeList, true)) {
+        if ( !in_array($name, $this->typeList, true) )
+        {
             throw new RuntimeException('类型非法');
         }
     }
