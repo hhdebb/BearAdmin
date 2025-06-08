@@ -1,5 +1,5 @@
 <!-- 如果有登录背景 -->
-{if $login_config.background}
+{if isset($login_config.background) && $login_config.background}
 <style>
     .login-page {
         background-color: #ececec;
