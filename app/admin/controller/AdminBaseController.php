@@ -178,6 +178,8 @@ class AdminBaseController
         $this->admin['map']          = config('map');
         // 当前用户
         $this->admin['user'] = $this->user ?? new AdminUser();
+        // 处理用户头像
+        $this->admin['user']['avatar'] = letter_avatar($this->admin['user']['nicename'] ?? $this->admin['user']['username']);
 
         // 赋值后台变量
         $this->assign([
