@@ -27,7 +27,7 @@ class InitEnv extends Command
     {
         $force = $input->getOption('force');
 
-        $example_file = $this->app->getRootPath() . '.example.env';
+        $example_file = $this->app->getRootPath() . '.env.example';
         $env_file     = $this->app->getRootPath() . '.env';
 
         if ($force === true || !file_exists($env_file)) {
