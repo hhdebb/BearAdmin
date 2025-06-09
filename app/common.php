@@ -149,7 +149,7 @@ if ( !function_exists('htmlentities_view') )
     }
 }
 
-if (!function_exists('hsv2rgb'))
+if ( !function_exists('hsv2rgb') )
 {
     function hsv2rgb($h, $s, $v): array
     {
@@ -161,7 +161,7 @@ if (!function_exists('hsv2rgb'))
         $q = $v * (1 - $f * $s);
         $t = $v * (1 - (1 - $f) * $s);
 
-        switch ($i % 6)
+        switch ( $i % 6 )
         {
             case 0:
                 $r = $v;
@@ -214,6 +214,10 @@ if ( !function_exists('letter_avatar') )
      */
     function letter_avatar($text): string
     {
+        if ( !is_string($text) )
+        {
+            $text = '';
+        }
         $total = unpack('L', hash('adler32', $text, true))[1];
         $hue   = $total % 360;
         list($r, $g, $b) = hsv2rgb($hue / 360, 0.3, 0.9);
