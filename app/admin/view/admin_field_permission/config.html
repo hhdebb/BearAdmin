@@ -1,0 +1,258 @@
+{extend name='public/base' /}
+{block name='content'}
+{include file='public/content_header' /}
+<section class="content">
+    <div class="container-fluid">
+
+        <!-- 操作提示栏 -->
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="callout callout-info">
+                    <h5>
+                        <i class="fas fa-info-circle"></i>
+                        当前配置：角色 <strong class="text-primary">{$role.name}</strong>
+                        &nbsp;/&nbsp;
+                        控制器 <strong class="text-info">{$controller}</strong>
+                        &nbsp;/&nbsp;
+                        数据表 <code>{$table_name}</code>
+                    </h5>
+                    <p class="mb-0 text-muted">
+                        <small>字段状态说明：
+                            <span class="badge badge-secondary">默认</span> 正常显示可编辑 &nbsp;
+                            <span class="badge badge-warning">只读</span> 显示文本不可修改 &nbsp;
+                            <span class="badge badge-info">禁用</span> 显示输入框但置灰 &nbsp;
+                            <span class="badge badge-dark">隐藏</span> 完全不渲染
+                        </small>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+
+            <!-- 字段权限配置卡片 -->
+            <div class="col-12">
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-columns"></i> 字段权限配置</h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        {if $fields}
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover text-center mb-0" id="fieldTable">
+                                <thead class="thead-light">
+                                <tr>
+                                    <th class="text-left" style="width:180px;">字段名</th>
+                                    <th>列表页<br><small class="text-muted">action: index</small></th>
+                                    <th>新增表单<br><small class="text-muted">action: add</small></th>
+                                    <th>编辑表单<br><small class="text-muted">action: edit</small></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {foreach name='fields' id='field'}
+                                <tr>
+                                    <td class="text-left">
+                                        <code>{$field}</code>
+                                    </td>
+                                    <!-- 列表 -->
+                                    <td>
+                                        <select class="form-control form-control-sm fieldSelect"
+                                                data-action="index"
+                                                data-field="{$field}"
+                                                name="field[index][{$field}]">
+                                            {foreach name='field_states' id='label' key='val'}
+                                            <option value="{$val}" {if isset($field_perms['index'][$field]) && $field_perms['index'][$field] == $val}selected{elseif $val == '' && !isset($field_perms['index'][$field])}selected{/if}>
+                                                {$label}
+                                            </option>
+                                            {/foreach}
+                                        </select>
+                                    </td>
+                                    <!-- 新增 -->
+                                    <td>
+                                        <select class="form-control form-control-sm fieldSelect"
+                                                data-action="add"
+                                                data-field="{$field}"
+                                                name="field[add][{$field}]">
+                                            {foreach name='field_states' id='label' key='val'}
+                                            <option value="{$val}" {if isset($field_perms['add'][$field]) && $field_perms['add'][$field] == $val}selected{elseif $val == '' && !isset($field_perms['add'][$field])}selected{/if}>
+                                                {$label}
+                                            </option>
+                                            {/foreach}
+                                        </select>
+                                    </td>
+                                    <!-- 编辑 -->
+                                    <td>
+                                        <select class="form-control form-control-sm fieldSelect"
+                                                data-action="edit"
+                                                data-field="{$field}"
+                                                name="field[edit][{$field}]">
+                                            {foreach name='field_states' id='label' key='val'}
+                                            <option value="{$val}" {if isset($field_perms['edit'][$field]) && $field_perms['edit'][$field] == $val}selected{elseif $val == '' && !isset($field_perms['edit'][$field])}selected{/if}>
+                                                {$label}
+                                            </option>
+                                            {/foreach}
+                                        </select>
+                                    </td>
+                                </tr>
+                                {/foreach}
+                                </tbody>
+                            </table>
+                        </div>
+                        {else}
+                        <div class="p-4 text-center text-muted">
+                            <i class="fas fa-exclamation-circle fa-2x mb-2"></i>
+                            <p>未找到该控制器对应的数据表字段。<br>
+                            请确认数据表 <code>{$table_name}</code> 已存在。</p>
+                        </div>
+                        {/if}
+                    </div>
+                    {if $fields}
+                    <div class="card-footer">
+                        <button type="button" class="btn btn-primary" id="saveFieldBtn">
+                            <i class="fas fa-save"></i> 保存字段权限
+                        </button>
+                        <button type="button" class="btn btn-default ml-2" onclick="history.back()">
+                            <i class="fas fa-arrow-left"></i> 返回
+                        </button>
+                    </div>
+                    {/if}
+                </div>
+            </div>
+
+            <!-- 按钮权限配置卡片 -->
+            <div class="col-12">
+                <div class="card card-warning">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-mouse-pointer"></i> 按钮权限配置</h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted mb-3">
+                            <small><i class="fas fa-info-circle"></i>
+                            勾选表示该角色在此控制器的列表页中<strong>可见</strong>该按钮，取消勾选则隐藏。
+                            </small>
+                        </p>
+                        <div class="row">
+                            {foreach name='standard_buttons' id='btn'}
+                            <div class="col-auto mb-3">
+                                <div class="custom-control custom-switch">
+                                    <input type="checkbox"
+                                           class="custom-control-input btnCheck"
+                                           id="btn_{$btn}"
+                                           name="btn[{$btn}]"
+                                           value="1"
+                                           {if !isset($btn_perms[$btn]) || $btn_perms[$btn] == 1}checked{/if}>
+                                    <label class="custom-control-label" for="btn_{$btn}">
+                                        {$button_labels[$btn]|default=$btn}
+                                    </label>
+                                </div>
+                            </div>
+                            {/foreach}
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button type="button" class="btn btn-warning" id="saveBtnBtn">
+                            <i class="fas fa-save"></i> 保存按钮权限
+                        </button>
+                        <button type="button" class="btn btn-default ml-2" onclick="history.back()">
+                            <i class="fas fa-arrow-left"></i> 返回
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<script>
+    var roleId     = {$role.id};
+    var controller = '{$controller}';
+    var saveFieldUrl = '{:url("saveField")}';
+    var saveBtnUrl   = '{:url("saveButton")}';
+
+    // 保存字段权限（按 action 分组，逐个提交）
+    $('#saveFieldBtn').on('click', function () {
+        var actions = ['index', 'add', 'edit'];
+        var requests = [];
+
+        actions.forEach(function (action) {
+            var config = {};
+            $('select.fieldSelect[data-action="' + action + '"]').each(function () {
+                var field = $(this).data('field');
+                var val   = $(this).val();
+                if (val) {  // 只提交有实际限制的
+                    config[field] = val;
+                }
+            });
+
+            requests.push($.ajax({
+                url    : saveFieldUrl,
+                type   : 'POST',
+                data   : {
+                    role_id    : roleId,
+                    controller : controller,
+                    action     : action,
+                    config     : config,
+                    __token__  : $('meta[name="csrf-token"]').attr('content')
+                }
+            }));
+        });
+
+        Promise.all(requests.map(function (r) { return r.then ? r : Promise.resolve(r); }))
+            .then(function (results) {
+                var allOk = results.every(function (r) { return r.code === 0; });
+                if (allOk) {
+                    layer.msg('字段权限保存成功', {icon: 1});
+                } else {
+                    layer.msg('部分保存失败，请检查', {icon: 2});
+                }
+            })
+            .catch(function () {
+                layer.msg('保存失败，请稍后重试', {icon: 2});
+            });
+    });
+
+    // 保存按钮权限
+    $('#saveBtnBtn').on('click', function () {
+        var config = {};
+        $('.btnCheck').each(function () {
+            var btn = $(this).attr('name').replace('btn[', '').replace(']', '');
+            config[btn] = $(this).is(':checked') ? 1 : 0;
+        });
+
+        $.ajax({
+            url  : saveBtnUrl,
+            type : 'POST',
+            data : {
+                role_id    : roleId,
+                controller : controller,
+                config     : config,
+                __token__  : $('meta[name="csrf-token"]').attr('content')
+            },
+            success : function (res) {
+                if (res.code === 0) {
+                    layer.msg('按钮权限保存成功', {icon: 1});
+                } else {
+                    layer.msg(res.msg || '保存失败', {icon: 2});
+                }
+            },
+            error : function () {
+                layer.msg('保存失败，请稍后重试', {icon: 2});
+            }
+        });
+    });
+
+    // 快捷操作：全部隐藏 / 全部默认
+    // 可通过表头增加批量操作按钮（可选扩展）
+</script>
+{/block}

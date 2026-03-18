@@ -1,4 +1,4 @@
-<!-- 空白页面参考模版 -->
+<!-- 后台用户列表（已接入字段/按钮权限控制） -->
 {extend name='public/base' /}
 {block name='content'}
 {include file='public/content_header' /}
@@ -35,26 +35,35 @@
                 <div class="card">
                     <div class="card-header">
 
+                        {if empty($_btn_perm) || !isset($_btn_perm['add']) || $_btn_perm['add'] == 1}
                         <a title="添加新数据" data-toggle="tooltip" class="btn btn-primary btn-sm " href="{:url('add')}">
                             <i class="fa fa-plus"></i> 添加
                         </a>
+                        {/if}
+
+                        {if empty($_btn_perm) || !isset($_btn_perm['delete']) || $_btn_perm['delete'] == 1}
                         <button class="btn btn-danger btn-sm AjaxButton" data-toggle="tooltip" title="删除选中数据"
                                 data-confirm-title="删除确认" data-confirm-content="您确定要删除选中的数据吗？"
                                 data-id="checked" data-url="{:url('del')}">
                             <i class="fa fa-trash"></i> 删除
                         </button>
+                        {/if}
 
+                        {if empty($_btn_perm) || !isset($_btn_perm['enable']) || $_btn_perm['enable'] == 1}
                         <button class="btn btn-success btn-sm AjaxButton" data-toggle="tooltip" title="启用选中数据"
                                 data-confirm-title="启用确认" data-confirm-content="您确定要启用选中的数据吗？" data-id="checked"
                                 data-url="{:url('enable')}">
                             <i class="far fa-circle"></i> 启用
                         </button>
+                        {/if}
 
+                        {if empty($_btn_perm) || !isset($_btn_perm['disable']) || $_btn_perm['disable'] == 1}
                         <button class="btn btn-warning btn-sm AjaxButton" data-toggle="tooltip" title="禁用选中数据"
                                 data-confirm-title="禁用确认" data-confirm-content="您确定要禁用选中的数据吗？" data-id="checked"
                                 data-url="{:url('disable')}">
                             <i class="fas fa-ban"></i> 禁用
                         </button>
+                        {/if}
 
                         <button class="btn btn-default btn-sm ReloadButton" data-toggle="tooltip" title="刷新列表数据">
                             <i class="fas fa-redo"></i> 刷新
@@ -72,10 +81,18 @@
                                            placeholder="全选/取消">
                                 </th>
                                 <th>ID</th>
+                                {if empty($_field_perm['nickname']) || $_field_perm['nickname'] !== 'hidden'}
                                 <th>昵称</th>
+                                {/if}
+                                {if empty($_field_perm['username']) || $_field_perm['username'] !== 'hidden'}
                                 <th>账号</th>
+                                {/if}
+                                {if empty($_field_perm['role']) || $_field_perm['role'] !== 'hidden'}
                                 <th>角色</th>
+                                {/if}
+                                {if empty($_field_perm['status']) || $_field_perm['status'] !== 'hidden'}
                                 <th>是否启用</th>
+                                {/if}
                                 <th>操作</th>
                             </tr>
                             </thead>
@@ -89,14 +106,22 @@
                                            placeholder="选择/取消" id="dataItem{$item.id}">
                                 </td>
                                 <td>{$item.id}</td>
+                                {if empty($_field_perm['nickname']) || $_field_perm['nickname'] !== 'hidden'}
                                 <td>{$item.nickname}</td>
+                                {/if}
+                                {if empty($_field_perm['username']) || $_field_perm['username'] !== 'hidden'}
                                 <td>{$item.username}</td>
+                                {/if}
+                                {if empty($_field_perm['role']) || $_field_perm['role'] !== 'hidden'}
                                 <td>
                                     {foreach name='item.role_list' id='item_role'}
                                     <span class="badge bg-primary ">{$item_role.name|default=''}</span>
                                     {/foreach}
                                 </td>
+                                {/if}
+                                {if empty($_field_perm['status']) || $_field_perm['status'] !== 'hidden'}
                                 <td>{bear:status value="$item.status" text="$item.status_text" /}</td>
+                                {/if}
                                 <td>
                                     <a href="{:url('edit',['id'=>$item.id])}"
                                        class="btn btn-primary btn-xs" title="修改" data-toggle="tooltip">
@@ -104,12 +129,15 @@
                                         修改
                                     </a>
 
+                                    {if empty($_btn_perm) || !isset($_btn_perm['delete']) || $_btn_perm['delete'] == 1}
                                     <button class="btn btn-danger btn-xs AjaxButton" data-toggle="tooltip" title="删除"  data-id="{$item.id}" data-confirm-title="删除确认" data-confirm-content='您确定要删除ID为 <span class="text-red">{$item.id}</span> 的数据吗' data-url="{:url('del')}">
                                         <i class="fas fa-trash"></i>
                                         删除
                                     </button>
+                                    {/if}
 
                                     {if $item.status==1}
+                                    {if empty($_btn_perm) || !isset($_btn_perm['disable']) || $_btn_perm['disable'] == 1}
                                     <button class="btn btn-warning btn-xs AjaxButton" data-toggle="tooltip" title="禁用"
                                        data-id="{$item.id}" data-confirm-title="禁用确认"
                                        data-confirm-content='您确定要禁用ID为 <span class="text-red">{$item.id}</span> 的数据吗'
@@ -117,7 +145,9 @@
                                         <i class="fas fa-ban"></i>
                                         禁用
                                     </button>
+                                    {/if}
                                     {else/}
+                                    {if empty($_btn_perm) || !isset($_btn_perm['enable']) || $_btn_perm['enable'] == 1}
                                     <button class="btn btn-success btn-xs AjaxButton" data-toggle="tooltip" title="启用"
                                        data-id="{$item.id}" data-confirm-title="启用确认"
                                        data-confirm-content='您确定要启用ID为 <span class="text-red">{$item.id}</span> 的数据吗'
@@ -125,6 +155,7 @@
                                         <i class="far fa-circle"></i>
                                         启用
                                     </button>
+                                    {/if}
                                     {/if}
                                 </td>
                             </tr>
