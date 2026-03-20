@@ -1,0 +1,133 @@
+{extend name='public/base' /}
+{block name='content'}
+{include file='public/content_header' /}
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+
+            <!-- 左侧角色列表 -->
+            <div class="col-md-3">
+                <div class="card card-primary card-outline">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-users-cog"></i> 选择角色</h3>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="list-group list-group-flush">
+                            {foreach name='roles' id='role'}
+                            <a href="javascript:void(0)"
+                               class="list-group-item list-group-item-action roleItem {if $current_role_id == $role.id}active{/if}"
+                               data-role-id="{$role.id}"
+                               data-role-name="{$role.name}">
+                                <i class="fas fa-user-tag mr-2"></i>{$role.name}
+                                <small class="text-muted d-block">{$role.description|default=''}</small>
+                            </a>
+                            {/foreach}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧控制器列表 -->
+            <div class="col-md-9">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-list-alt"></i>
+                            控制器字段权限配置
+                            <span id="currentRoleName" class="badge badge-primary ml-2">
+                                {if $current_role_id > 0}请选择控制器{else}请先选择角色{/if}
+                            </span>
+                        </h3>
+                        <div class="card-tools">
+                            <div class="input-group input-group-sm" style="width: 200px;">
+                                <input type="text" id="ctrlSearch" class="form-control" placeholder="搜索控制器...">
+                                <div class="input-group-append">
+                                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table table-hover table-bordered mb-0" id="ctrlTable">
+                            <thead class="thead-light">
+                            <tr>
+                                <th style="width:50px;">#</th>
+                                <th>控制器</th>
+                                <th>对应数据表</th>
+                                <th style="width:200px;">操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {foreach name='controllers' id='ctrl' key='idx'}
+                            <tr class="ctrlRow">
+                                <td>{$idx+1}</td>
+                                <td>
+                                    <code>{$ctrl}</code>
+                                </td>
+                                <td>
+                                    <span class="text-muted">{:strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $ctrl))}</span>
+                                </td>
+                                <td>
+                                    <a href="javascript:void(0)"
+                                       class="btn btn-sm btn-primary configFieldBtn"
+                                       data-controller="{$ctrl}"
+                                       title="配置字段权限">
+                                        <i class="fas fa-columns"></i> 字段权限
+                                    </a>
+                                </td>
+                            </tr>
+                            {/foreach}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="card-footer text-muted">
+                        <small>共 {$controllers|count} 个可配置控制器</small>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<script>
+    var currentRoleId = {$current_role_id|default=0};
+
+    // 角色切换
+    $('.roleItem').on('click', function () {
+        $('.roleItem').removeClass('active');
+        $(this).addClass('active');
+        currentRoleId = $(this).data('role-id');
+        var roleName  = $(this).data('role-name');
+        $('#currentRoleName').text('角色：' + roleName);
+    });
+
+    // 配置按钮
+    $(document).on('click', '.configFieldBtn', function () {
+        if (!currentRoleId) {
+            layer.msg('请先选择左侧角色', {icon: 2});
+            return;
+        }
+        var ctrl = $(this).data('controller');
+        var url  = '{:url("config")}' + '?role_id=' + currentRoleId + '&controller=' + ctrl;
+        window.location.href = url;
+    });
+
+    // 控制器搜索过滤
+    $('#ctrlSearch').on('input', function () {
+        var kw = $(this).val().toLowerCase();
+        $('.ctrlRow').each(function () {
+            var name = $(this).find('code').text().toLowerCase();
+            $(this).toggle(name.indexOf(kw) >= 0);
+        });
+    });
+
+    // 页面加载时恢复选中角色显示
+    {if $current_role_id > 0}
+    var activeName = $('.roleItem.active').data('role-name');
+    if (activeName) {
+        $('#currentRoleName').text('角色：' + activeName);
+    }
+    {/if}
+</script>
+{/block}

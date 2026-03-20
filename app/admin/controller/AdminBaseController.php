@@ -10,6 +10,7 @@ namespace app\admin\controller;
 
 use app\admin\traits\{AdminAuthTrait, AdminPhpOffice, AdminTreeTrait};
 use app\admin\model\{AdminMenu, AdminUser};
+use app\admin\service\AdminFieldPermissionService;
 use think\response\Json;
 use think\facade\Env;
 use think\View;
@@ -181,11 +182,34 @@ class AdminBaseController
         // 处理用户头像
         $this->admin['user']['avatar'] = letter_avatar($this->admin['user']['nicename'] ?? $this->admin['user']['username']);
 
+        // 注入字段/按钮权限变量（超管 id=1 豁免，登录页面跳过）
+        if (isset($this->user) && $this->user->id !== 1 && 'admin/auth/login' !== $this->url) {
+            $permService = new AdminFieldPermissionService();
+            $ctrlName    = $this->parseControllerName();
+            $action      = request()->action(true);
+            $this->assign('_field_perm', $permService->getUserFieldPermission($this->user, $ctrlName, $action));
+            $this->assign('_btn_perm', $permService->getUserButtonPermission($this->user, $ctrlName));
+        } else {
+            $this->assign('_field_perm', []);
+            $this->assign('_btn_perm', []);
+        }
+
         // 赋值后台变量
         $this->assign([
             'admin' => $this->admin,
         ]);
         return $this->view->fetch($template, $vars);
+    }
+
+    /**
+     * 从当前 URL 解析控制器名（snake_case → PascalCase）
+     * $this->url = "admin/admin_user/index" → "AdminUser"
+     */
+    private function parseControllerName(): string
+    {
+        $parts = explode('/', $this->url);
+        $snake = $parts[1] ?? '';
+        return str_replace('_', '', ucwords($snake, '_'));
     }
 
     /**

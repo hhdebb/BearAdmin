@@ -16,11 +16,25 @@
                 </div>
                 <!-- 表单 -->
                 <form id="dataForm" class="form-horizontal dataForm" role="form" action="" method="post" enctype="multipart/form-data">
-                    <!-- 表单字段区域 -->
+                    <!-- 表单字段区域（已接入字段权限控制：_field_perm 由 AdminBaseController::fetch() 自动注入） -->
                     <div class="card-body">
+
+                        {if empty($_field_perm['role']) || $_field_perm['role'] !== 'hidden'}
                         <div class="form-group row">
                             <label for="role" class="col-sm-2 col-form-label ">角色</label>
                             <div class="col-sm-10 col-md-4 formInputDiv">
+                                {if !empty($_field_perm['role']) && $_field_perm['role'] === 'readonly'}
+                                <p class="form-control-plaintext">
+                                    {if isset($data)}{foreach name='data.role' id='rid'}{$rid}{if !$rid@last},{/if}{/foreach}{/if}
+                                </p>
+                                {elseif !empty($_field_perm['role']) && $_field_perm['role'] === 'disabled'}
+                                <select class="form-control select2bs4" id="role" name="role[]" data-placeholder="请选择角色" multiple disabled>
+                                    {foreach name='role_list' id='item'}
+                                    <option value="{$item.id}" {if isset($data) && in_array($item.id,$data.role)}selected{/if}>{$item.name}</option>
+                                    {/foreach}
+                                </select>
+                                <input type="hidden" name="role[]" value="">
+                                {else}
                                 <select class="form-control select2bs4" id="role" name="role[]" data-placeholder="请选择角色" multiple>
                                     <option value="">请选择角色</option>
                                     {foreach name='role_list' id='item'}
@@ -29,6 +43,7 @@
                                     </option>
                                     {/foreach}
                                 </select>
+                                {/if}
                             </div>
                         </div>
                         <script>
@@ -36,41 +51,78 @@
                                 theme: 'bootstrap4'
                             })
                         </script>
+                        {/if}
 
+                        {if empty($_field_perm['nickname']) || $_field_perm['nickname'] !== 'hidden'}
                         <div class="form-group row">
                             <label for="nickname" class="col-sm-2 col-form-label ">昵称</label>
                             <div class="col-sm-10 col-md-4 formInputDiv">
+                                {if !empty($_field_perm['nickname']) && $_field_perm['nickname'] === 'readonly'}
+                                <p class="form-control-plaintext">{$data.nickname|default=''}</p>
+                                {elseif !empty($_field_perm['nickname']) && $_field_perm['nickname'] === 'disabled'}
+                                <input type="text" class="form-control" id="nickname" name="nickname"
+                                       value="{$data.nickname|default=''}" placeholder="请输入昵称" disabled>
+                                <input type="hidden" name="nickname" value="{$data.nickname|default=''}">
+                                {else}
                                 <input type="text" class="form-control"
                                        id="nickname" name="nickname" value="{$data.nickname|default=''}"
                                        placeholder="请输入昵称">
+                                {/if}
                             </div>
                         </div>
+                        {/if}
 
+                        {if empty($_field_perm['username']) || $_field_perm['username'] !== 'hidden'}
                         <div class="form-group row">
                             <label for="username" class="col-sm-2 col-form-label ">账号</label>
                             <div class="col-sm-10 col-md-4 formInputDiv">
+                                {if !empty($_field_perm['username']) && $_field_perm['username'] === 'readonly'}
+                                <p class="form-control-plaintext">{$data.username|default=''}</p>
+                                {elseif !empty($_field_perm['username']) && $_field_perm['username'] === 'disabled'}
+                                <input type="text" class="form-control" id="username" name="username"
+                                       value="{$data.username|default=''}" placeholder="请输入账号" disabled>
+                                <input type="hidden" name="username" value="{$data.username|default=''}">
+                                {else}
                                 <input type="text" class="form-control"
                                        id="username" name="username" value="{$data.username|default=''}"
                                        placeholder="请输入账号">
+                                {/if}
                             </div>
                         </div>
+                        {/if}
 
+                        {if empty($_field_perm['password']) || $_field_perm['password'] !== 'hidden'}
                         <div class="form-group row">
                             <label for="password" class="col-sm-2 col-form-label ">密码</label>
                             <div class="col-sm-10 col-md-4 formInputDiv">
+                                {if !empty($_field_perm['password']) && $_field_perm['password'] === 'readonly'}
+                                <p class="form-control-plaintext">******</p>
+                                {elseif !empty($_field_perm['password']) && $_field_perm['password'] === 'disabled'}
+                                <input type="password" class="form-control" id="password" name="password"
+                                       value="" placeholder="请输入密码" disabled>
+                                {else}
                                 <input type="password" class="form-control"
                                        id="password" name="password" value="{$data.password|default=''}"
                                        placeholder="请输入密码">
+                                {/if}
                             </div>
                         </div>
+                        {/if}
 
+                        {if empty($_field_perm['status']) || $_field_perm['status'] !== 'hidden'}
                         <div class="form-group row">
                             <label for="status" class="col-sm-2 col-form-label ">是否启用</label>
                             <div class="col-sm-10 col-md-4 formInputDiv">
+                                {if !empty($_field_perm['status']) && $_field_perm['status'] === 'readonly'}
+                                <p class="form-control-plaintext">{if isset($data) && $data.status == 1}是{else}否{/if}</p>
+                                {else}
                                 <input class="switch fieldSwitch" id="status" name="status"
-                                       value="{$data.status|default='1'}" hidden/>
+                                       value="{$data.status|default='1'}" hidden
+                                       {if !empty($_field_perm['status']) && $_field_perm['status'] === 'disabled'}disabled{/if}/>
                                 <input type="checkbox" class="input-switch" id="statusSwitch" value="1"
-                                       {if(!isset($data) ||$data.status==1)}checked{/if}/>
+                                       {if(!isset($data) ||$data.status==1)}checked{/if}
+                                       {if !empty($_field_perm['status']) && $_field_perm['status'] === 'disabled'}disabled{/if}/>
+                                {/if}
                             </div>
 
                         </div>
@@ -85,6 +137,7 @@
                                 }
                             });
                         </script>
+                        {/if}
 
                     </div>
                     <div class="card-footer">
