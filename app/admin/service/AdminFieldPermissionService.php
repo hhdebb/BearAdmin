@@ -53,20 +53,35 @@ class AdminFieldPermissionService extends AdminBaseService
             return [];
         }
 
-        $cacheKey = 'field_perm_' . md5(implode(',', $roleIds) . '|' . $controller . '|' . $action);
-        return Cache::remember($cacheKey, function () use ($roleIds, $controller, $action) {
-            $records = AdminFieldPermission::where('role_id', 'in', $roleIds)
+        // Check which roleIds are already cached; fetch uncached ones in a single query
+        $sets        = [];
+        $missingIds  = [];
+        foreach ($roleIds as $roleId) {
+            $cacheKey = 'field_perm_' . md5($roleId . '|' . $controller . '|' . $action);
+            $cached   = Cache::get($cacheKey);
+            if ($cached !== null) {
+                $sets[$roleId] = $cached;
+            } else {
+                $missingIds[] = $roleId;
+            }
+        }
+
+        if (!empty($missingIds)) {
+            $records = AdminFieldPermission::where('role_id', 'in', $missingIds)
                 ->where('controller', $controller)
                 ->where('action', $action)
                 ->where('delete_time', 0)
-                ->column('field_config');
+                ->column('field_config', 'role_id');
 
-            $sets = array_map(function ($v) {
-                return json_decode($v, true) ?: [];
-            }, $records);
+            foreach ($missingIds as $roleId) {
+                $perm     = isset($records[$roleId]) ? (json_decode($records[$roleId], true) ?: []) : [];
+                $cacheKey = 'field_perm_' . md5($roleId . '|' . $controller . '|' . $action);
+                Cache::set($cacheKey, $perm, 300);
+                $sets[$roleId] = $perm;
+            }
+        }
 
-            return $this->mergeFieldPermissions($sets);
-        }, 300);
+        return $this->mergeFieldPermissions(array_values($sets));
     }
 
     /**
@@ -83,25 +98,43 @@ class AdminFieldPermissionService extends AdminBaseService
             return [];
         }
 
-        $cacheKey = 'btn_perm_' . md5(implode(',', $roleIds) . '|' . $controller);
-        return Cache::remember($cacheKey, function () use ($roleIds, $controller) {
-            $records = AdminButtonPermission::where('role_id', 'in', $roleIds)
+        // Check which roleIds are already cached; fetch uncached ones in a single query
+        $perRole    = [];
+        $missingIds = [];
+        foreach ($roleIds as $roleId) {
+            $cacheKey = 'btn_perm_' . md5($roleId . '|' . $controller);
+            $cached   = Cache::get($cacheKey);
+            if ($cached !== null) {
+                $perRole[$roleId] = $cached;
+            } else {
+                $missingIds[] = $roleId;
+            }
+        }
+
+        if (!empty($missingIds)) {
+            $records = AdminButtonPermission::where('role_id', 'in', $missingIds)
                 ->where('controller', $controller)
                 ->where('delete_time', 0)
-                ->column('button_config');
+                ->column('button_config', 'role_id');
 
-            $merged = [];
-            foreach ($records as $json) {
-                $config = json_decode($json, true) ?: [];
-                foreach ($config as $btn => $val) {
-                    // 任一角色禁用（0）则最终禁用
-                    $merged[$btn] = isset($merged[$btn])
-                        ? min($merged[$btn], (int)$val)
-                        : (int)$val;
-                }
+            foreach ($missingIds as $roleId) {
+                $config   = isset($records[$roleId]) ? (json_decode($records[$roleId], true) ?: []) : [];
+                $cacheKey = 'btn_perm_' . md5($roleId . '|' . $controller);
+                Cache::set($cacheKey, $config, 300);
+                $perRole[$roleId] = $config;
             }
-            return $merged;
-        }, 300);
+        }
+
+        $merged = [];
+        foreach ($perRole as $config) {
+            foreach ($config as $btn => $val) {
+                // 任一角色禁用（0）则最终禁用
+                $merged[$btn] = isset($merged[$btn])
+                    ? min($merged[$btn], (int)$val)
+                    : (int)$val;
+            }
+        }
+        return $merged;
     }
 
     /**
@@ -194,6 +227,14 @@ class AdminFieldPermissionService extends AdminBaseService
      */
     public function getControllerFields(string $controller): array
     {
+        if (!preg_match('/^Admin[A-Za-z]+$/', $controller)) {
+            return [];
+        }
+        // Verify the controller class actually exists to prevent processing of arbitrary names
+        $fqcn = 'app\\admin\\controller\\' . $controller . 'Controller';
+        if (!class_exists($fqcn)) {
+            return [];
+        }
         $table = $this->controllerToTable($controller);
         try {
             $columns = Db::query("SHOW COLUMNS FROM `{$table}`");
